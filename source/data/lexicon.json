@@ -2,7 +2,7 @@
     "equivalents": {
         "#LORD": "{\\hoskeroe LORD}",
         "#GOD": "{\\hoskeroe GOD}",
-        "##TAB": "{\\vin}",
+        "##TAB": "\\vin",
         "#AHAT": "\\^{a}",
         "#AGRAVE": "\\`{a}",
         "#EACUTE": "\\'{e}",

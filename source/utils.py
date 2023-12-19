@@ -30,6 +30,8 @@ OTHER_MODS = {
     "em_dashes",
 }
 ALL_MODS = SUPPRESS_NON_STANDARD_MODS.union(OTHER_MODS)
+HPML_EXTENSION = ".hpml"
+TEX_EXTENSION = ".tex"
 
 #############
 # FUNCTIONS #

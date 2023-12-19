@@ -24,6 +24,8 @@ FRACTIONS = get_lexicon()["fractions"]
 class Preprocessor:
     """ The class in question. """
     def __init__(self, hpml, raw_mods):
+        if not raw_mods:
+            raw_mods = ()
         self.hpml = hpml
         self.mods = build_mods(raw_mods)
 
