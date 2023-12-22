@@ -26,10 +26,11 @@ class HPMLCompiler:
     input_string: str = None
     is_prose_poem: bool = False
     mods: list[str] = None
-    temp: str = None
-    lines: list[str] = None
     path_to_output_file: str = None
     output_string: str = None
+    # Non-public.
+    _temp: str = None
+    _lines: list[str] = None
 
     def __post_init__(self):
         if self.path_to_input_file and self.input_string:
@@ -48,162 +49,166 @@ class HPMLCompiler:
             self.path_to_output_file = \
                 Path(self.path_to_input_file).with_suffix(TEX_EXTENSION)
 
-    def compile(self):
+    def compile(self) -> str:
         """ Build the output string from the input. """
-        self.preprocess()
-        self.build_output()
+        self._preprocess()
+        self._process()
+        if self.path_to_output_file:
+            return self.path_to_output_file
+        return self.output
 
-    def preprocess(self):
+    def _preprocess(self):
         """ Run the input through a preprocessor object. """
         preprocessor = Preprocessor(self.input_string, self.mods)
-        self.temp = preprocessor.preprocess()
+        self._temp = preprocessor.preprocess()
 
-    def build_output(self):
+    def _process(self):
         """ Ronseal. """
-        self.lines = self.temp.split("\n")
-        self.purge_whitespace()
-        self.process_choruses()
-        self.process_minichoruses()
-        self.add_endings()
-        self.process_syntactics()
-        self.process_semantics()
-        self.output_string = "\n".join(self.lines)
+        self._lines = self._temp.split("\n")
+        self._purge_whitespace()
+        self._process_choruses()
+        self._process_minichoruses()
+        self._add_endings()
+        self._process_syntactics()
+        self._process_semantics()
+        self.output_string = "\n".join(self._lines)
 
-    def purge_whitespace(self):
+    def _purge_whitespace(self):
         """ Ronseal. """
-        for index, line in enumerate(self.lines):
+        for index, line in enumerate(self._lines):
             # Remove whitespace from line ends.
             while line.endswith(" "):
                 line = line[:len(line)-1]
-            self.lines[index] = line
+            self._lines[index] = line
         # Remove any trailing blank lines.
-        while self.lines[len(self.lines)-1] == "":
-            self.lines = self.lines[0:-1]
+        while self._lines[len(self._lines)-1] == "":
+            self._lines = self._lines[0:-1]
 
-    def process_choruses(self):
+    def _process_choruses(self):
         """ Handles choruses and inscriptions. """
-        for index, line in enumerate(self.lines):
+        for index, line in enumerate(self._lines):
             if ("###CHORUS" in line) or ("###INSCRIPTION" in line):
-                for line_num in range(index+1, len(self.lines)):
-                    current_line = self.lines[line_num]
-                    previous_line = self.lines[line_num-1]
-                    if index == len(self.lines)-1:
-                        self.lines[line_num] = current_line+"}"
+                for line_num in range(index+1, len(self._lines)):
+                    current_line = self._lines[line_num]
+                    previous_line = self._lines[line_num-1]
+                    if index == len(self._lines)-1:
+                        self._lines[line_num] = current_line+"}"
                     elif current_line == "":
-                        self.lines[line_num-1] = previous_line+"}"
+                        self._lines[line_num-1] = previous_line+"}"
                         break
-                self.lines[index] = "{\\itshape "
+                self._lines[index] = "{\\itshape "
 
-    def process_minichoruses(self):
+    def _process_minichoruses(self):
         """ Handles mini-choruses and mini-inscriptions. """
-        for index, line in enumerate(self.lines):
+        for index, line in enumerate(self._lines):
             if ("##MINICHORUS" in line) or ("##MINIINSCRIPTION" in line):
                 line = line.replace("##MINICHORUS ", "\\vin \\textit{")
                 line = line.replace("##MINIINSCRIPTION ", "\\textit{")
                 line = line+"}"
-                self.lines[index] = line
+                self._lines[index] = line
 
-    def add_endings(self):
+    def _add_endings(self):
         """ Adds "\\", "\\*" or "\\!" to each line, as appropriate. """
         if self.is_prose_poem:
             return
-        for index, line in enumerate(self.lines):
+        for index, line in enumerate(self._lines):
             if (
                 (line == "") or
                 (line == "{\\itshape ") or
-                (index == len(self.lines)-1)
+                (index == len(self._lines)-1)
                ):
                 pass
-            elif (index != len(self.lines)-1) and (self.lines[index+1] == ""):
+            elif (index != len(self._lines)-1) and (self._lines[index+1] == ""):
                 line = line+"\\\\!"
-                self.lines[index] = line
-            elif index in (0, len(self.lines)-2):
+                self._lines[index] = line
+            elif index in (0, len(self._lines)-2):
                 line = line+"\\\\*"
-                self.lines[index] = line
-            elif self.lines[index-1] == "":
+                self._lines[index] = line
+            elif self._lines[index-1] == "":
                 line = line+"\\\\*"
-                self.lines[index] = line
-            elif (index < len(self.lines)-2) and (self.lines[index+2] == ""):
+                self._lines[index] = line
+            elif (index < len(self._lines)-2) and (self._lines[index+2] == ""):
                 line = line+"\\\\*"
-                self.lines[index] = line
+                self._lines[index] = line
             else:
                 line = line+"\\\\"
-                self.lines[index] = line
+                self._lines[index] = line
 
-    def process_syntactics(self):
+    def _process_syntactics(self):
         """ Translate those clusters for which clear equivalents exist. """
         for hpml_code, latex_code in EQUIVALENTS.items():
-            self.replace_across_all_lines(hpml_code, latex_code)
+            self._replace_across_all_lines(hpml_code, latex_code)
 
-    def replace_across_all_lines(self, old, new):
+    def _replace_across_all_lines(self, old, new):
         """ Replace every instance of old with new across all lines. """
-        for index, line in enumerate(self.lines):
-            self.lines[index] = line.replace(old, new)
+        for index, line in enumerate(self._lines):
+            self._lines[index] = line.replace(old, new)
 
-    def process_semantics(self):
+    def _process_semantics(self):
         """ Ronseal. """
-        self.process_places()
-        self.process_persons()
-        self.process_publications()
-        self.process_foreign_strings()
-        self.process_fractions()
-        self.process_ampersands()
-        self.process_stress()
-        self.process_flagverses()
-        self.process_subscript()
-        self.process_whitespace()
+        self._process_places()
+        self._process_persons()
+        self._process_publications()
+        self._process_foreign_strings()
+        self._process_fractions()
+        self._process_ampersands()
+        self._process_stress()
+        self._process_flagverses()
+        self._process_subscript()
+        self._process_whitespace()
 
-    def process_places(self):
+    def _process_places(self):
         """ Ronseal. """
-        self.replace_across_all_lines("#PLACE{", "\\textsc{")
+        self._replace_across_all_lines("#PLACE{", "\\textsc{")
 
-    def process_persons(self):
+    def _process_persons(self):
         """ Ronseal. """
-        self.replace_across_all_lines("#PERSON{", "\\textit{")
+        self._replace_across_all_lines("#PERSON{", "\\textit{")
 
-    def process_publications(self):
+    def _process_publications(self):
         """ Ronseal. """
-        self.replace_across_all_lines("#PUBLICATION{", "{\\hoskeroe ")
+        self._replace_across_all_lines("#PUBLICATION{", "{\\hoskeroe ")
 
-    def process_foreign_strings(self):
+    def _process_foreign_strings(self):
         """ Ronseal. """
-        self.replace_across_all_lines("#FOREIGN{", "{\\hoskeroe ")
+        self._replace_across_all_lines("#FOREIGN{", "{\\hoskeroe ")
 
-    def process_fractions(self):
+    def _process_fractions(self):
         """ Ronseal. """
         for hpml_code, sub_dict in FRACTIONS.items():
             latex_code = sub_dict["latex"]
-            self.replace_across_all_lines(hpml_code, latex_code)
+            self._replace_across_all_lines(hpml_code, latex_code)
 
-    def process_ampersands(self):
+    def _process_ampersands(self):
         """ Ronseal. """
-        self.replace_across_all_lines("#ADD", "\\&")
+        self._replace_across_all_lines("#ADD", "\\&")
 
-    def process_stress(self):
+    def _process_stress(self):
         """ Handles stressed syllables. """
-        self.replace_across_all_lines("#STRESS{", "\\'{")
+        self._replace_across_all_lines("#STRESS{", "\\'{")
 
-    def process_flagverses(self):
+    def _process_flagverses(self):
         """ Adds mini-titles to particular verses. """
-        self.replace_across_all_lines(
+        self._replace_across_all_lines(
             "##FLAGVERSE{",
             "\\flagverse{\\footnotesize "
         )
 
-    def process_subscript(self):
+    def _process_subscript(self):
         """ Ronseal. """
-        self.replace_across_all_lines("#SUB{", "\\textsubscript{")
+        self._replace_across_all_lines("#SUB{", "\\textsubscript{")
 
-    def process_whitespace(self):
+    def _process_whitespace(self):
         """ Ronseal. """
-        self.replace_across_all_lines("#WHITESPACE{", "\\textcolor{white}{")
+        self._replace_across_all_lines("#WHITESPACE{", "\\textcolor{white}{")
 
-    def save_to_file(self):
+    def save_to_file(self) -> str:
         """ Save the output string to a file. """
         if not self.path_to_output_file:
             raise HPMLCompilerException("No save file path specified.")
         with open(self.path_to_output_file, "w") as output_file:
             output_file.write(self.output_string)
+        return self.path_to_output_file
 
 ################################
 # HELPER CLASSES AND FUNCTIONS #
