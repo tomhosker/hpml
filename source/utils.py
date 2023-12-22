@@ -32,6 +32,8 @@ OTHER_MODS = {
 ALL_MODS = SUPPRESS_NON_STANDARD_MODS.union(OTHER_MODS)
 HPML_EXTENSION = ".hpml"
 TEX_EXTENSION = ".tex"
+BEGIN_VERSE = "\\begin{verse}"
+END_VERSE = "\\end{verse}"
 
 #############
 # FUNCTIONS #

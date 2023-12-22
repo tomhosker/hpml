@@ -8,7 +8,7 @@ from pathlib import Path
 
 # Local imports.
 from .preprocessor import Preprocessor
-from .utils import TEX_EXTENSION, get_lexicon
+from .utils import TEX_EXTENSION, BEGIN_VERSE, END_VERSE, get_lexicon
 
 # Local constants.
 LEXICON = get_lexicon()
@@ -28,6 +28,7 @@ class HPMLCompiler:
     mods: list[str] = None
     path_to_output_file: str = None
     output_string: str = None
+    enclose: bool = True
     # Non-public.
     _temp: str = None
     _lines: list[str] = None
@@ -71,6 +72,8 @@ class HPMLCompiler:
         self._add_endings()
         self._process_syntactics()
         self._process_semantics()
+        if self.enclose:
+            self._enclose_output()
         self.output_string = "\n".join(self._lines)
 
     def _purge_whitespace(self):
@@ -201,6 +204,10 @@ class HPMLCompiler:
     def _process_whitespace(self):
         """ Ronseal. """
         self._replace_across_all_lines("#WHITESPACE{", "\\textcolor{white}{")
+
+    def _enclose_output(self):
+        """ Enclose the input in a poem environment. """
+        self._lines = [BEGIN_VERSE]+self._lines+[END_VERSE]
 
     def save_to_file(self) -> str:
         """ Save the output string to a file. """
