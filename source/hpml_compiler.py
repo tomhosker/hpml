@@ -55,7 +55,7 @@ class HPMLCompiler:
         self._process()
         if self.path_to_output_file:
             return self.path_to_output_file
-        return self.output
+        return self.output_string
 
     def _preprocess(self):
         """ Run the input through a preprocessor object. """
