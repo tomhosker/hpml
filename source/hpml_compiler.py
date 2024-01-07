@@ -7,8 +7,16 @@ from dataclasses import dataclass
 from pathlib import Path
 
 # Local imports.
+from .centerer import Centerer
 from .preprocessor import Preprocessor
-from .utils import TEX_EXTENSION, BEGIN_VERSE, END_VERSE, get_lexicon
+from .utils import (
+    TEX_EXTENSION,
+    BEGIN_VERSE,
+    END_VERSE,
+    PRE_SETTOWIDTH,
+    POST_SETTOWIDTH,
+    get_lexicon
+)
 
 # Local constants.
 LEXICON = get_lexicon()
@@ -29,6 +37,8 @@ class HPMLCompiler:
     path_to_output_file: str = None
     output_string: str = None
     enclose: bool = True
+    manual_settowidth_string: str = None
+    auto_center: bool = True
     # Non-public.
     _temp: str = None
     _lines: list[str] = None
@@ -208,6 +218,17 @@ class HPMLCompiler:
     def _enclose_output(self):
         """ Enclose the input in a poem environment. """
         self._lines = [BEGIN_VERSE]+self._lines+[END_VERSE]
+        if self.manual_settowidth_string or self.auto_center:
+            self._center_output()
+
+    def _center_output(self):
+        """ Add a string to center this poem on the page. """
+        if self.manual_settowidth_string:
+            settowidth_string = self.manual_settowidth
+        else:
+            settowidth_string = get_settowidth_string(self.input_string)
+        settowidth_line = PRE_SETTOWIDTH+settowidth_string+POST_SETTOWIDTH
+        self._lines = [settowidth_line]+self._lines
 
     def save_to_file(self) -> str:
         """ Save the output string to a file. """
@@ -223,3 +244,9 @@ class HPMLCompiler:
 
 class HPMLCompilerException(Exception):
     """ A custom exception. """
+
+def get_settowidth_string(input_string):
+    """ Get an automatically-generated settowidth string for a given poem in
+    HPML code. """
+    centerer = Centerer(input_string)
+    return centerer.get_settowidth_string()

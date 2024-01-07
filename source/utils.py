@@ -34,6 +34,8 @@ HPML_EXTENSION = ".hpml"
 TEX_EXTENSION = ".tex"
 BEGIN_VERSE = "\\begin{verse}"
 END_VERSE = "\\end{verse}"
+PRE_SETTOWIDTH = "\\settowidth{\\versewidth}{"
+POST_SETTOWIDTH = "}"
 
 #############
 # FUNCTIONS #

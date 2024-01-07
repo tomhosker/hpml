@@ -25,6 +25,8 @@ def test_hpml_compiler():
     path_to_expected = str(path_obj_to_data/"ode_on_a_grecian_urn_expected.tex")
     with open(path_to_expected, "r") as expected_file:
         expected = expected_file.read()
+    while expected.endswith("\n"):
+        expected = expected[0:-1]
     assert actual == expected
     # Clean.
     Path(path_to_actual).unlink()
