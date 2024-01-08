@@ -4,6 +4,7 @@ This code defines some utility functions used across the package.
 
 # Standard imports.
 import json
+import re
 import shutil
 import warnings
 from pathlib import Path
@@ -33,6 +34,7 @@ ALL_MODS = SUPPRESS_NON_STANDARD_MODS.union(OTHER_MODS)
 HPML_EXTENSION = ".hpml"
 TEX_EXTENSION = ".tex"
 BEGIN_VERSE = "\\begin{verse}"
+BEGIN_VERSE_CENTERED = BEGIN_VERSE+"[\\versewidth]"
 END_VERSE = "\\end{verse}"
 PRE_SETTOWIDTH = "\\settowidth{\\versewidth}{"
 POST_SETTOWIDTH = "}"
@@ -60,3 +62,24 @@ def install_hpml_lang():
                 "machine. Therefore, it has not been possible to install the "+
                 "HPML language features into Gedit."
             )
+
+def trim_whitespace(line):
+    """ Remove (1) whitespace from the front, (2) and from the back, and (3)
+    any double, triple, etc spaces. """
+    line = re.sub("^ *", "", line)
+    line = re.sub(" *$", "", line)
+    while "  " in line:
+        line = line.replace("  ", " ")
+    return line
+
+def trim_blank_lines(lines):
+    """ Trim any trailing blank lines, and any double, triple, etc blank lines,
+    from a list of lines. """
+    result = []
+    last_index = len(lines)-1
+    prev = None
+    for index, line in enumerate(lines):
+        if (line != "") or ((prev != "") and (index != last_index)):
+            result.append(line)
+        prev = line
+    return result

@@ -12,10 +12,13 @@ from .preprocessor import Preprocessor
 from .utils import (
     TEX_EXTENSION,
     BEGIN_VERSE,
+    BEGIN_VERSE_CENTERED,
     END_VERSE,
     PRE_SETTOWIDTH,
     POST_SETTOWIDTH,
-    get_lexicon
+    get_lexicon,
+    trim_whitespace,
+    trim_blank_lines
 )
 
 # Local constants.
@@ -89,13 +92,8 @@ class HPMLCompiler:
     def _purge_whitespace(self):
         """ Ronseal. """
         for index, line in enumerate(self._lines):
-            # Remove whitespace from line ends.
-            while line.endswith(" "):
-                line = line[:len(line)-1]
-            self._lines[index] = line
-        # Remove any trailing blank lines.
-        while self._lines[len(self._lines)-1] == "":
-            self._lines = self._lines[0:-1]
+            self._lines[index] = trim_whitespace(line)
+        self._lines = trim_blank_lines(self._lines)
 
     def _process_choruses(self):
         """ Handles choruses and inscriptions. """
@@ -149,8 +147,8 @@ class HPMLCompiler:
 
     def _process_syntactics(self):
         """ Translate those clusters for which clear equivalents exist. """
-        for hpml_code, latex_code in EQUIVALENTS.items():
-            self._replace_across_all_lines(hpml_code, latex_code)
+        for hpml_code, eq_dict in EQUIVALENTS.items():
+            self._replace_across_all_lines(hpml_code, eq_dict["latex"])
 
     def _replace_across_all_lines(self, old, new):
         """ Replace every instance of old with new across all lines. """
@@ -159,6 +157,7 @@ class HPMLCompiler:
 
     def _process_semantics(self):
         """ Ronseal. """
+        self._process_tabs()
         self._process_places()
         self._process_persons()
         self._process_publications()
@@ -169,6 +168,10 @@ class HPMLCompiler:
         self._process_flagverses()
         self._process_subscript()
         self._process_whitespace()
+
+    def _process_tabs(self):
+        """ Ronseal. """
+        self._replace_across_all_lines("##TAB", "\\textsc{")
 
     def _process_places(self):
         """ Ronseal. """
@@ -217,7 +220,11 @@ class HPMLCompiler:
 
     def _enclose_output(self):
         """ Enclose the input in a poem environment. """
-        self._lines = [BEGIN_VERSE]+self._lines+[END_VERSE]
+        if self.manual_settowidth_string or self.auto_center:
+            local_begin_verse = BEGIN_VERSE_CENTERED
+        else:
+            local_begin_verse = BEGIN_VERSE
+        self._lines = [local_begin_verse]+self._lines+[END_VERSE]
         if self.manual_settowidth_string or self.auto_center:
             self._center_output()
 

@@ -7,7 +7,7 @@ from setuptools import setup
 
 # Local constants.
 PACKAGE_NAME = "hpml"
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 DESCRIPTION = "Hosker's Poetical Markup Language"
 GIT_URL_STEM = "https://github.com/tomhosker"
 AUTHOR = "Tom Hosker"

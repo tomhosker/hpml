@@ -1,28 +1,81 @@
 {
     "equivalents": {
-        "#LORD": "{\\hoskeroe LORD}",
-        "#GOD": "{\\hoskeroe GOD}",
-        "##TAB": "\\vin",
-        "#AHAT": "\\^{a}",
-        "#AGRAVE": "\\`{a}",
-        "#EACUTE": "\\'{e}",
-        "#EGRAVE": "\\`{e}",
-        "#EDDOT": "\\\"{e}",
-        "#EHAT": "\\^{e}",
-        "#CEDILLA": "\\c{c}",
-        "#ODIAERESIS": "\\\"{o}",
-        "#KNOTS": "\\textsc{kts}",
-        "#ETC": "\\&c.",
-        "#SHIP{": "{\\hoskeroe ",
-        "#POUNDS": "{\\pounds}",
-        "#SHILLINGS": "s",
-        "#PENCE": "d",
-        "#ENDOFSECTION": "\\aldine",
-        "#PAUSE": "$\\wp$",
-        "#PERCENT": "\\%",
-        "#NUMERO": "\\textnumero",
-        "#ITAL{": "\\textit{",
-        "|": "$\\mid$"
+        "#LORD": {
+            "latex": "{\\hoskeroe LORD}",
+            "plain": "LORD"
+        },
+        "#GOD": {
+            "latex": "{\\hoskeroe GOD}",
+            "plain": "LORD"
+        },
+        "#AHAT": {
+            "latex": "\\^{a}",
+            "plain": "a"
+        },
+        "#AGRAVE": {
+            "latex": "\\`{a}",
+            "plain": "a"
+        },
+        "#EACUTE": {
+            "latex": "\\'{e}",
+            "plain": "e"
+        },
+        "#EGRAVE": {
+            "latex": "\\`{e}",
+            "plain": "e"
+        },
+        "#EDDOT": {
+            "latex": "\\\"{e}",
+            "plain": "e"
+        },
+        "#EHAT": {
+            "latex": "\\^{e}",
+            "plain": "e"
+        },
+        "#CEDILLA": {
+            "latex": "\\c{c}",
+            "plain": "c"
+        },
+        "#ODDOT": {
+            "latex": "\\\"{o}",
+            "plain": "o"
+        },
+        "#KNOTS": {
+            "latex": "\\textsc{kts}",
+            "plain": "KTS"
+        },
+        "#ETC": {
+            "latex": "\\&c.",
+            "plain": "etc"
+        },
+        "#POUNDS": {
+            "latex": "{\\pounds}",
+            "plain": "GBP"
+        },
+        "#SHILLINGS": {
+            "latex": "s",
+            "plain": "s"
+        },
+        "#PENCE": {
+            "latex": "d",
+            "plain": "d"
+        },
+        "#ENDOFSECTION": {
+            "latex": "\\aldine",
+            "plain": "~"
+        },
+        "#PAUSE": {
+            "latex": "$\\wp$",
+            "plain": "|"
+        },
+        "#PERCENT": {
+            "latex": "\\%",
+            "plain": "%"
+        },
+        "#NUMERO": {
+            "latex": "\\textnumero",
+            "plain": "No"
+        }
     },
     "fractions": {
         "#HALF": {
