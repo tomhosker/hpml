@@ -57,6 +57,7 @@ def convert_line_of_hpml_to_plain_text(line):
     tabs = line.count("##TAB")
     line = convert_equivalents_in_line(line)
     line = convert_fractions_in_line(line)
+    line = re.sub("##MARGINNOTE{.*}", "", line) # Remove any margin notes.
     line = re.sub("##\\w*", "", line) # Remove any word beginning "##...".
     line = re.sub("#\\w*", "", line) # Remove any word beginning "#...".
     line = line.replace("{", "")

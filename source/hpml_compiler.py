@@ -158,6 +158,7 @@ class HPMLCompiler:
     def _process_semantics(self):
         """ Ronseal. """
         self._process_tabs()
+        self._process_margin_notes()
         self._process_places()
         self._process_persons()
         self._process_publications()
@@ -171,7 +172,14 @@ class HPMLCompiler:
 
     def _process_tabs(self):
         """ Ronseal. """
-        self._replace_across_all_lines("##TAB", "\\textsc{")
+        self._replace_across_all_lines("##TAB", "\\vin")
+
+    def _process_margin_notes(self):
+        """ Ronseal. """
+        self._replace_across_all_lines(
+            "##MARGINNOTE{",
+            "\\marginnote{\\footnotesize "
+        )
 
     def _process_places(self):
         """ Ronseal. """
