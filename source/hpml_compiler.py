@@ -79,6 +79,7 @@ class HPMLCompiler:
     def _process(self):
         """ Ronseal. """
         self._lines = self._temp.split("\n")
+        self._update_manual_settowidth_string()
         self._purge_whitespace()
         self._process_choruses()
         self._process_minichoruses()
@@ -236,12 +237,31 @@ class HPMLCompiler:
         if self.manual_settowidth_string or self.auto_center:
             self._center_output()
 
+    def _update_manual_settowidth_string(self):
+        """ Check each line to see whether the verse width is set manually. """
+        settowidth_marker = "###SETTOWIDTH{"
+        settowidth_len = len(settowidth_marker)
+        settowidth_line_index = None
+        for index, line in enumerate(self._lines):
+            if line.startswith(settowidth_marker) and line.endswith("}"):
+                if not self.manual_settowidth_string:
+                    self.manual_settowidth_string = line[settowidth_len:-1]
+                settowidth_line_index = index
+        if settowidth_line_index is not None:
+            self._lines.pop(settowidth_line_index)
+
+    def _get_auto_settowidth_string(self):
+        """ Get an automatically-generated settowidth string for a given poem in
+        HPML code. """
+        centerer = Centerer(self.input_string)
+        return centerer.get_settowidth_string()
+
     def _center_output(self):
         """ Add a string to center this poem on the page. """
         if self.manual_settowidth_string:
-            settowidth_string = self.manual_settowidth
+            settowidth_string = self.manual_settowidth_string
         else:
-            settowidth_string = get_settowidth_string(self.input_string)
+            settowidth_string = self._get_auto_settowidth_string()
         settowidth_line = PRE_SETTOWIDTH+settowidth_string+POST_SETTOWIDTH
         self._lines = [settowidth_line]+self._lines
 
@@ -253,15 +273,9 @@ class HPMLCompiler:
             output_file.write(self.output_string)
         return self.path_to_output_file
 
-################################
-# HELPER CLASSES AND FUNCTIONS #
-################################
+##################
+# HELPER CLASSES #
+##################
 
 class HPMLCompilerException(Exception):
     """ A custom exception. """
-
-def get_settowidth_string(input_string):
-    """ Get an automatically-generated settowidth string for a given poem in
-    HPML code. """
-    centerer = Centerer(input_string)
-    return centerer.get_settowidth_string()

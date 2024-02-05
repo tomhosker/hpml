@@ -73,13 +73,16 @@ def trim_whitespace(line):
     return line
 
 def trim_blank_lines(lines):
-    """ Trim any trailing blank lines, and any double, triple, etc blank lines,
-    from a list of lines. """
+    """ Trim any leading or trailing blank lines, and any double, triple, etc
+    blank lines, from a list of lines. """
     result = []
     last_index = len(lines)-1
     prev = None
     for index, line in enumerate(lines):
-        if (line != "") or ((prev != "") and (index != last_index)):
+        if (
+            (line != "") or
+            ((prev is not None) and (prev != "") and (index != last_index))
+        ):
             result.append(line)
         prev = line
     return result
