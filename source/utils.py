@@ -7,6 +7,7 @@ import json
 import re
 import shutil
 import warnings
+from enum import Enum
 from pathlib import Path
 
 # Local constants.
@@ -17,20 +18,6 @@ PATH_TO_HPML_LANG_SRC = str((PATH_OBJ_TO_DATA/"hpml.lang").resolve())
 PATH_OBJ_TO_HPML_LANG_DST = \
     PATH_OBJ_TO_GTKSOURCEVIEW/"language-specs"/"hpml.lang"
 PATH_TO_HPML_LANG_DST = str(PATH_OBJ_TO_HPML_LANG_DST.resolve())
-SUPPRESS_NON_STANDARD_MOD_NAME = "suppress_non_standard"
-SUPPRESS_NON_STANDARD_MODS = {
-    "suppress_person_font",
-    "suppress_place_font",
-    "suppress_publication_font",
-    "suppress_foreign_font",
-    "suppress_ship_font",
-    "suppress_fractions",
-    "suppress_ampersands"
-}
-OTHER_MODS = {
-    "em_dashes",
-}
-ALL_MODS = SUPPRESS_NON_STANDARD_MODS.union(OTHER_MODS)
 HPML_EXTENSION = ".hpml"
 TEX_EXTENSION = ".tex"
 BEGIN_VERSE = "\\begin{verse}"
@@ -39,9 +26,49 @@ END_VERSE = "\\end{verse}"
 PRE_SETTOWIDTH = "\\settowidth{\\versewidth}{"
 POST_SETTOWIDTH = "}"
 
+#########
+# ENUMS #
+#########
+
+SUPPRESS_NON_STANDARD = "suppress_non_standard"
+
+class SuppressNonStandardMods(Enum):
+    """ Lists the mods which, individually, suppress any non-standard printing
+    conventions. """
+    SUPPRESS_PERSON_FONT = "suppress_person_font"
+    SUPPRESS_PLACE_FONT = "suppress_place_font"
+    SUPPRESS_PUBLICATION_FONT = "suppress_publication_font"
+    SUPPRESS_FOREIGN_FONT = "suppress_foreign_font"
+    SUPPRESS_SHIP_FONT = "suppress_ship_font"
+    SUPPRESS_FRACTIONS = "suppress_fractions"
+    SUPPRESS_AMPERSANDS = "suppress_ampersands"
+
+class OtherMods(Enum):
+    """ Lists the mods which do not suppress any non-standard printing
+    conventions. """
+    EM_DASHES = "em_dashes"
+
+# Sets of values are sometimes useful.
+SUPPRESS_NON_STANDARD_MODS_AS_SET = {
+    item.value for item in SuppressNonStandardMods
+}
+OTHER_MODS_AS_SET = {item.value for item in OtherMods}
+
 #############
 # FUNCTIONS #
 #############
+
+def is_suppress_non_standard_mod(mod_name):
+    """ Determine whether the enum contains this value. """
+    if mod_name in SUPPRESS_NON_STANDARD_MODS_AS_SET:
+        return True
+    return False
+
+def is_other_mod(mod_name):
+    """ Determine whether the enum contains this value. """
+    if mod_name in OTHER_MODS_AS_SET:
+        return True
+    return False
 
 def get_lexicon():
     """ Return a dictionary of the HTML lexicon. """

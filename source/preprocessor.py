@@ -8,10 +8,11 @@ import warnings
 
 # Local imports.
 from .utils import (
-    SUPPRESS_NON_STANDARD_MOD_NAME,
-    SUPPRESS_NON_STANDARD_MODS,
-    ALL_MODS,
-    get_lexicon
+    is_suppress_non_standard_mod,
+    is_other_mod,
+    get_lexicon,
+    SUPPRESS_NON_STANDARD,
+    SUPPRESS_NON_STANDARD_MODS_AS_SET
 )
 
 # Local constants.
@@ -81,9 +82,9 @@ def build_mods(raw_mods):
     """ Build a SET of mods from a list of raw mods. """
     result = set()
     for raw_mod in raw_mods:
-        if raw_mod == SUPPRESS_NON_STANDARD_MOD_NAME:
-            result = result.union(SUPPRESS_NON_STANDARD_MODS)
-        elif raw_mod in ALL_MODS:
+        if raw_mod == SUPPRESS_NON_STANDARD:
+            result = result.union(SUPPRESS_NON_STANDARD_MODS_AS_SET)
+        elif is_suppress_non_standard_mod(raw_mod) or is_other_mod(raw_mod):
             result.add(raw_mod)
         else:
             warnings.warn("Unrecognised preprocessor mod: "+str(raw_mod))
