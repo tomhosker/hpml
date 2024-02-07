@@ -7,12 +7,8 @@ poem on a page.
 import re
 
 # Local imports.
-from .utils import get_lexicon, trim_whitespace, trim_blank_lines
-
-# Local constants.
-LEXICON = get_lexicon()
-EQUIVALENTS = LEXICON["equivalents"]
-FRACTIONS = LEXICON["fractions"]
+from .lookups import SYNTACTICS, FRACTIONS
+from .utils import trim_whitespace, trim_blank_lines
 
 ##############
 # MAIN CLASS #
@@ -69,12 +65,12 @@ def convert_line_of_hpml_to_plain_text(line):
 
 def convert_equivalents_in_line(line):
     """ Convert any straightforward equivalents from HPML to plain text. """
-    for hpml_code, eq_dict in EQUIVALENTS.items():
-        line = line.replace(hpml_code, eq_dict["plain"])
+    for hpml_code, value in SYNTACTICS.items():
+        line = line.replace(hpml_code, value.plain)
     return line
 
 def convert_fractions_in_line(line):
     """ Convert any fractions from HPML to plain text. """
-    for hpml_code, frac_dict in FRACTIONS.items():
-        line = line.replace(hpml_code, frac_dict["words"])
+    for hpml_code, value in FRACTIONS.items():
+        line = line.replace(hpml_code, value.plain)
     return line

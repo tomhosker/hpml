@@ -7,12 +7,13 @@ import json
 import re
 import shutil
 import warnings
-from enum import Enum
 from pathlib import Path
+from types import SimpleNamespace
 
 # Local constants.
 PATH_OBJ_TO_DATA = Path(__file__).parent/"data"
-PATH_TO_LEXICON = str((PATH_OBJ_TO_DATA/"lexicon.json").resolve())
+PATH_TO_SYNTACTICS = str((PATH_OBJ_TO_DATA/"syntactics.json").resolve())
+PATH_TO_SEMANTICS = str((PATH_OBJ_TO_DATA/"semantics.json").resolve())
 PATH_OBJ_TO_GTKSOURCEVIEW = Path("/usr")/"share"/"gtksourceview-4"
 PATH_TO_HPML_LANG_SRC = str((PATH_OBJ_TO_DATA/"hpml.lang").resolve())
 PATH_OBJ_TO_HPML_LANG_DST = \
@@ -20,61 +21,27 @@ PATH_OBJ_TO_HPML_LANG_DST = \
 PATH_TO_HPML_LANG_DST = str(PATH_OBJ_TO_HPML_LANG_DST.resolve())
 HPML_EXTENSION = ".hpml"
 TEX_EXTENSION = ".tex"
-BEGIN_VERSE = "\\begin{verse}"
-BEGIN_VERSE_CENTERED = BEGIN_VERSE+"[\\versewidth]"
-END_VERSE = "\\end{verse}"
-PRE_SETTOWIDTH = "\\settowidth{\\versewidth}{"
-POST_SETTOWIDTH = "}"
-
-#########
-# ENUMS #
-#########
-
-SUPPRESS_NON_STANDARD = "suppress_non_standard"
-
-class SuppressNonStandardMods(Enum):
-    """ Lists the mods which, individually, suppress any non-standard printing
-    conventions. """
-    SUPPRESS_PERSON_FONT = "suppress_person_font"
-    SUPPRESS_PLACE_FONT = "suppress_place_font"
-    SUPPRESS_PUBLICATION_FONT = "suppress_publication_font"
-    SUPPRESS_FOREIGN_FONT = "suppress_foreign_font"
-    SUPPRESS_SHIP_FONT = "suppress_ship_font"
-    SUPPRESS_FRACTIONS = "suppress_fractions"
-    SUPPRESS_AMPERSANDS = "suppress_ampersands"
-
-class OtherMods(Enum):
-    """ Lists the mods which do not suppress any non-standard printing
-    conventions. """
-    EM_DASHES = "em_dashes"
-
-# Sets of values are sometimes useful.
-SUPPRESS_NON_STANDARD_MODS_AS_SET = {
-    item.value for item in SuppressNonStandardMods
-}
-OTHER_MODS_AS_SET = {item.value for item in OtherMods}
 
 #############
 # FUNCTIONS #
 #############
 
-def is_suppress_non_standard_mod(mod_name):
-    """ Determine whether the enum contains this value. """
-    if mod_name in SUPPRESS_NON_STANDARD_MODS_AS_SET:
-        return True
-    return False
+def get_syntactics():
+    """ Return a dictionary of the HPML syntactic commands. """
+    with open(PATH_TO_SYNTACTICS, "r") as syntactics_file:
+        syntactics_str = syntactics_file.read()
+    syntactics_dict = json.loads(syntactics_str)
+    result = {}
+    for key, value in syntactics_dict.items():
+        result[key] = SimpleNamespace(**value)
+    return result
 
-def is_other_mod(mod_name):
-    """ Determine whether the enum contains this value. """
-    if mod_name in OTHER_MODS_AS_SET:
-        return True
-    return False
-
-def get_lexicon():
-    """ Return a dictionary of the HTML lexicon. """
-    with open(PATH_TO_LEXICON, "r") as lexicon_file:
-        lexicon_str = lexicon_file.read()
-    result = json.loads(lexicon_str)
+def get_semantics():
+    """ Return an object of the HPML semantic commands. """
+    with open(PATH_TO_SEMANTICS, "r") as semantics_file:
+        semantics_str = semantics_file.read()
+    result = \
+        json.loads(semantics_str, object_hook=lambda d: SimpleNamespace(**d))
     return result
 
 def install_hpml_lang():

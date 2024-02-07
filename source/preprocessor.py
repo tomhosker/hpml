@@ -7,16 +7,15 @@ HPML into LaTeX.
 import warnings
 
 # Local imports.
-from .utils import (
+from .lookups import (
     is_suppress_non_standard_mod,
     is_other_mod,
-    get_lexicon,
     SUPPRESS_NON_STANDARD,
-    SUPPRESS_NON_STANDARD_MODS_AS_SET
+    SUPPRESS_NON_STANDARD_MODS_AS_SET,
+    SEMANTICS,
+    FRACTIONS,
+    DASHES
 )
-
-# Local constants.
-FRACTIONS = get_lexicon()["fractions"]
 
 ##############
 # MAIN CLASS #
@@ -43,36 +42,36 @@ class Preprocessor:
 
     def suppress_person_font(self):
         """ Implement the mod. """
-        self.replace_substring("#PERSON", "")
+        self.replace_substring(SEMANTICS.person.hpml, "")
 
     def suppress_place_font(self):
         """ Implement the mod. """
-        self.replace_substring("#PLACE", "")
+        self.replace_substring(SEMANTICS.place.hpml, "")
 
     def suppress_publication_font(self):
         """ Implement the mod. """
-        self.replace_substring("#PUBLICATION", "#ITAL")
+        self.replace_substring(SEMANTICS.publication.hpml, SEMANTICS.ital.hpml)
 
     def suppress_foreign_font(self):
         """ Implement the mod. """
-        self.replace_substring("#FOREIGN", "#ITAL")
+        self.replace_substring(SEMANTICS.foreign.hpml, SEMANTICS.ital.hpml)
 
     def suppress_ship_font(self):
         """ Implement the mod. """
-        self.replace_substring("#SHIP", "#ITAL")
+        self.replace_substring(SEMANTICS.ship.hpml, SEMANTICS.ital.hpml)
 
     def suppress_ampersands(self):
         """ Implement the mod. """
-        self.replace_substring("#ADD", "and")
+        self.replace_substring(SEMANTICS.add.hpml, SEMANTICS.add.plain)
 
     def suppress_fractions(self):
         """ Implement the mod. """
-        for fraction, sub_dict in FRACTIONS.items():
-            self.replace_substring(fraction, sub_dict["words"])
+        for fraction, value in FRACTIONS.items():
+            self.replace_substring(fraction, value.plain)
 
     def em_dashes(self):
         """ Implement the mod. """
-        self.replace_substring(" -- ", " --- ")
+        self.replace_substring(" "+DASHES.n+" ", " "+DASHES.m+" ")
 
 ####################
 # HELPER FUNCTIONS #

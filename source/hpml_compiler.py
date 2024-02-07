@@ -8,23 +8,17 @@ from pathlib import Path
 
 # Local imports.
 from .centerer import Centerer
-from .preprocessor import Preprocessor
-from .utils import (
-    TEX_EXTENSION,
-    BEGIN_VERSE,
-    BEGIN_VERSE_CENTERED,
-    END_VERSE,
-    PRE_SETTOWIDTH,
-    POST_SETTOWIDTH,
-    get_lexicon,
-    trim_whitespace,
-    trim_blank_lines
+from .lookups import (
+    SEMANTICS,
+    SYNTACTICS,
+    FRACTIONS,
+    OtherLaTeX
 )
+from .preprocessor import Preprocessor
+from .utils import TEX_EXTENSION, trim_whitespace, trim_blank_lines
 
 # Local constants.
-LEXICON = get_lexicon()
-EQUIVALENTS = LEXICON["equivalents"]
-FRACTIONS = LEXICON["fractions"]
+ENDBLC = OtherLaTeX.END_BLOCK.value
 
 ##############
 # MAIN CLASS #
@@ -99,24 +93,38 @@ class HPMLCompiler:
     def _process_choruses(self):
         """ Handles choruses and inscriptions. """
         for index, line in enumerate(self._lines):
-            if ("###CHORUS" in line) or ("###INSCRIPTION" in line):
+            if (
+                (SEMANTICS.chorus.hpml in line) or
+                (SEMANTICS.inscription.hpml in line)
+            ):
                 for line_num in range(index+1, len(self._lines)):
                     current_line = self._lines[line_num]
                     previous_line = self._lines[line_num-1]
                     if index == len(self._lines)-1:
-                        self._lines[line_num] = current_line+"}"
+                        self._lines[line_num] = current_line+ENDBLC
                     elif current_line == "":
-                        self._lines[line_num-1] = previous_line+"}"
+                        self._lines[line_num-1] = previous_line+ENDBLC
                         break
-                self._lines[index] = "{\\itshape "
+                self._lines[index] = OtherLaTeX.MULTILINE_ITALICS
 
     def _process_minichoruses(self):
         """ Handles mini-choruses and mini-inscriptions. """
         for index, line in enumerate(self._lines):
-            if ("##MINICHORUS" in line) or ("##MINIINSCRIPTION" in line):
-                line = line.replace("##MINICHORUS ", "\\vin \\textit{")
-                line = line.replace("##MINIINSCRIPTION ", "\\textit{")
-                line = line+"}"
+            if (
+                (SEMANTICS.minichorus.hpml in line) or
+                (SEMANTICS.miniinscription.hpml in line)
+            ):
+                line = \
+                    line.replace(
+                        SEMANTICS.minichorus.hpml,
+                        SEMANTICS.minichorus.latex
+                    )
+                line = \
+                    line.replace(
+                        SEMANTICS.miniinscription.hpml,
+                        SEMANTICS.miniinscription.latex
+                    )
+                line = line+ENDBLC
                 self._lines[index] = line
 
     def _add_endings(self):
@@ -126,30 +134,28 @@ class HPMLCompiler:
         for index, line in enumerate(self._lines):
             if (
                 (line == "") or
-                (line == "{\\itshape ") or
+                (line == OtherLaTeX.MULTILINE_ITALICS) or
                 (index == len(self._lines)-1)
                ):
                 pass
             elif (index != len(self._lines)-1) and (self._lines[index+1] == ""):
-                line = line+"\\\\!"
+                line = line+SEMANTICS.newverse.latex
                 self._lines[index] = line
-            elif index in (0, len(self._lines)-2):
-                line = line+"\\\\*"
-                self._lines[index] = line
-            elif self._lines[index-1] == "":
-                line = line+"\\\\*"
-                self._lines[index] = line
-            elif (index < len(self._lines)-2) and (self._lines[index+2] == ""):
-                line = line+"\\\\*"
+            elif (
+                (index in (0, len(self._lines)-2)) or
+                (self._lines[index-1] == "") or
+                ((index < len(self._lines)-2) and (self._lines[index+2] == ""))
+            ):
+                line = line+SEMANTICS.newline_nobreak.latex
                 self._lines[index] = line
             else:
-                line = line+"\\\\"
+                line = line+SEMANTICS.newline.latex
                 self._lines[index] = line
 
     def _process_syntactics(self):
         """ Translate those clusters for which clear equivalents exist. """
-        for hpml_code, eq_dict in EQUIVALENTS.items():
-            self._replace_across_all_lines(hpml_code, eq_dict["latex"])
+        for hpml_code, value in SYNTACTICS.items():
+            self._replace_across_all_lines(hpml_code, value.latex)
 
     def _replace_across_all_lines(self, old, new):
         """ Replace every instance of old with new across all lines. """
@@ -173,77 +179,98 @@ class HPMLCompiler:
 
     def _process_tabs(self):
         """ Ronseal. """
-        self._replace_across_all_lines("##TAB", "\\vin")
+        self._replace_across_all_lines(SEMANTICS.tab.hpml, SEMANTICS.tab.latex)
 
     def _process_margin_notes(self):
         """ Ronseal. """
         self._replace_across_all_lines(
-            "##MARGINNOTE{",
-            "\\marginnote{\\footnotesize "
+            SEMANTICS.marginnote.hpml,
+            SEMANTICS.marginnote.latex
         )
 
     def _process_places(self):
         """ Ronseal. """
-        self._replace_across_all_lines("#PLACE{", "\\textsc{")
+        self._replace_across_all_lines(
+            SEMANTICS.place.hpml,
+            SEMANTICS.place.latex
+        )
 
     def _process_persons(self):
         """ Ronseal. """
-        self._replace_across_all_lines("#PERSON{", "\\textit{")
+        self._replace_across_all_lines(
+            SEMANTICS.person.hpml,
+            SEMANTICS.person.latex
+        )
 
     def _process_publications(self):
         """ Ronseal. """
-        self._replace_across_all_lines("#PUBLICATION{", "{\\hoskeroe ")
+        self._replace_across_all_lines(
+            SEMANTICS.publication.hpml,
+            SEMANTICS.publication.latex
+        )
 
     def _process_foreign_strings(self):
         """ Ronseal. """
-        self._replace_across_all_lines("#FOREIGN{", "{\\hoskeroe ")
+        self._replace_across_all_lines(
+            SEMANTICS.foreign.hpml,
+            SEMANTICS.foreign.latex
+        )
 
     def _process_fractions(self):
         """ Ronseal. """
-        for hpml_code, sub_dict in FRACTIONS.items():
-            latex_code = sub_dict["latex"]
-            self._replace_across_all_lines(hpml_code, latex_code)
+        for hpml, value in FRACTIONS.items():
+            self._replace_across_all_lines(hpml, value.latex)
 
     def _process_ampersands(self):
         """ Ronseal. """
-        self._replace_across_all_lines("#ADD", "\\&")
+        self._replace_across_all_lines(SEMANTICS.add.hpml, SEMANTICS.add.latex)
 
     def _process_stress(self):
         """ Handles stressed syllables. """
-        self._replace_across_all_lines("#STRESS{", "\\'{")
+        self._replace_across_all_lines(
+            SEMANTICS.stress.hpml,
+            SEMANTICS.stress.latex
+        )
 
     def _process_flagverses(self):
         """ Adds mini-titles to particular verses. """
         self._replace_across_all_lines(
-            "##FLAGVERSE{",
-            "\\flagverse{\\footnotesize "
+            SEMANTICS.flagverse.hpml,
+            SEMANTICS.flagverse.latex
         )
 
     def _process_subscript(self):
         """ Ronseal. """
-        self._replace_across_all_lines("#SUB{", "\\textsubscript{")
+        self._replace_across_all_lines(SEMANTICS.sub.hpml, SEMANTICS.sub.latex)
 
     def _process_whitespace(self):
         """ Ronseal. """
-        self._replace_across_all_lines("#WHITESPACE{", "\\textcolor{white}{")
+        self._replace_across_all_lines(
+            SEMANTICS.whitespace.hpml,
+            SEMANTICS.whitespace.latex
+        )
 
     def _enclose_output(self):
         """ Enclose the input in a poem environment. """
         if self.manual_settowidth_string or self.auto_center:
-            local_begin_verse = BEGIN_VERSE_CENTERED
+            local_begin_verse = OtherLaTeX.BEGIN_VERSE_CENTERED.value
         else:
-            local_begin_verse = BEGIN_VERSE
-        self._lines = [local_begin_verse]+self._lines+[END_VERSE]
+            local_begin_verse = OtherLaTeX.BEGIN_VERSE.value
+        self._lines = (
+            [local_begin_verse]+
+            self._lines+
+            [OtherLaTeX.END_VERSE.value]
+        )
         if self.manual_settowidth_string or self.auto_center:
             self._center_output()
 
     def _update_manual_settowidth_string(self):
         """ Check each line to see whether the verse width is set manually. """
-        settowidth_marker = "###SETTOWIDTH{"
+        settowidth_marker = SEMANTICS.settowidth.hpml
         settowidth_len = len(settowidth_marker)
         settowidth_line_index = None
         for index, line in enumerate(self._lines):
-            if line.startswith(settowidth_marker) and line.endswith("}"):
+            if line.startswith(settowidth_marker) and line.endswith(ENDBLC):
                 if not self.manual_settowidth_string:
                     self.manual_settowidth_string = line[settowidth_len:-1]
                 settowidth_line_index = index
@@ -262,7 +289,11 @@ class HPMLCompiler:
             settowidth_string = self.manual_settowidth_string
         else:
             settowidth_string = self._get_auto_settowidth_string()
-        settowidth_line = PRE_SETTOWIDTH+settowidth_string+POST_SETTOWIDTH
+        settowidth_line = (
+            OtherLaTeX.PRE_SETTOWIDTH.value+
+            settowidth_string+
+            ENDBLC
+        )
         self._lines = [settowidth_line]+self._lines
 
     def save_to_file(self) -> str:
