@@ -56,6 +56,8 @@ class HPMLCompiler:
         if self.path_to_input_file and not self.path_to_output_file:
             self.path_to_output_file = \
                 Path(self.path_to_input_file).with_suffix(TEX_EXTENSION)
+        if self.is_prose_poem:
+            self.enclose = False
 
     def compile(self) -> str:
         """ Build the output string from the input. """
