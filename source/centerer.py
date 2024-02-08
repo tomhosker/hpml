@@ -3,12 +3,23 @@ This code defines a class which generates a LaTeX string which CENTERS a given
 poem on a page.
 """
 
-# Standard imports.
-import re
-
 # Local imports.
-from .lookups import SYNTACTICS, FRACTIONS
-from .utils import trim_whitespace, trim_blank_lines
+from .lookups import SEMANTICS, SYNTACTICS, FRACTIONS, STABLC, ENDBLC
+from .utils import (
+    trim_whitespace,
+    trim_blank_lines,
+    remove_command_with_argument,
+    remove_commands_without_arguments
+)
+
+# Constants.
+COMMANDS_WITH_ARGUMENTS_TO_PURGE = (
+    SEMANTICS.blfootnote.hpml,
+    SEMANTICS.footnote.hpml,
+    SEMANTICS.flagverse.hpml,
+    SEMANTICS.marginnote.hpml,
+    SEMANTICS.settowidth.hpml
+)
 
 ##############
 # MAIN CLASS #
@@ -35,7 +46,7 @@ class Centerer:
             if len(line) > len(longest_line):
                 second_longest_line = longest_line
                 longest_line = line
-            elif len(line) > len(second_longest_line):
+            elif len(longest_line) > len(line) > len(second_longest_line):
                 second_longest_line = line
         return second_longest_line
 
@@ -50,17 +61,17 @@ class Centerer:
 
 def convert_line_of_hpml_to_plain_text(line):
     """ Purge any HPML code, etc, from a given line. """
-    tabs = line.count("##TAB")
+    tabs = line.count(SEMANTICS.tab.hpml)
     line = convert_equivalents_in_line(line)
     line = convert_fractions_in_line(line)
-    line = re.sub("##MARGINNOTE{.*}", "", line) # Remove any margin notes.
-    line = re.sub("##\\w*", "", line) # Remove any word beginning "##...".
-    line = re.sub("#\\w*", "", line) # Remove any word beginning "#...".
-    line = line.replace("{", "")
-    line = line.replace("}", "")
+    for command in COMMANDS_WITH_ARGUMENTS_TO_PURGE:
+        line = remove_command_with_argument(command, line)
+    line = remove_commands_without_arguments(line)
+    line = line.replace(STABLC, "")
+    line = line.replace(ENDBLC, "")
     line = trim_whitespace(line)
     for _ in range(tabs):
-        line = "    "+line
+        line = SEMANTICS.tab.plain+line
     return line
 
 def convert_equivalents_in_line(line):

@@ -23,6 +23,10 @@ FRACTIONS = {
 SEMANTICS = get_semantics()
 SYNTACTICS = get_syntactics()
 
+# Abbreviations.
+STABLC = SEMANTICS.startblock.hpml # Same as LaTeX.
+ENDBLC = SEMANTICS.endblock.hpml # Same as LaTeX.
+
 ########
 # MODS #
 ########
@@ -53,6 +57,7 @@ OTHER_MODS_AS_SET = {item.value for item in OtherMods}
 
 class OtherLaTeX(Enum):
     """ Defines some useful LaTeX formulae which don't crop up elsewhere. """
+    START_BLOCK = "{"
     END_BLOCK = "}"
     BEGIN_VERSE = "\\begin{verse}"
     BEGIN_VERSE_CENTERED = "\\begin{verse}[\\versewidth]"
@@ -60,6 +65,12 @@ class OtherLaTeX(Enum):
     PRE_SETTOWIDTH = "\\settowidth{\\versewidth}{"
     POST_SETTOWIDTH = "}"
     MULTILINE_ITALICS = "{\\itshape"
+    BEGIN_CENTER = "\\begin{center}"
+    END_CENTER = "\\end{center}"
+    BIGSKIP = "\\bigskip"
+    NEW_LINE = "\\\\"
+    NEW_LINE_NO_BREAK = "\\\\*"
+    NEW_VERSE = "\\\\!"
 
 #############
 # FUNCTIONS #

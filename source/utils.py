@@ -80,3 +80,23 @@ def trim_blank_lines(lines):
             result.append(line)
         prev = line
     return result
+
+def remove_command_with_argument(command, line):
+    """ Purge anything of the form #COMMAND{argument}. """
+    regex_pattern = command+".*}"
+    result = re.sub(regex_pattern, "", line)
+    return result
+
+def remove_commands_without_arguments(line):
+    """ Remove each #COMMAND, ##COMMAND, etc. """
+    for hashes in (1, 2):
+        result = remove_commands_with_hashes_but_without_arguments(line, hashes)
+    return result
+
+def remove_commands_with_hashes_but_without_arguments(line, hashes):
+    """ Remove each #COMMAND OR ##COMMAND, etc. """
+    regex_pattern = "\\w*"
+    for _ in range(hashes):
+        regex_pattern = "#"+regex_pattern
+    result = re.sub(regex_pattern, "", line)
+    return result

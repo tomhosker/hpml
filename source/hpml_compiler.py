@@ -12,13 +12,11 @@ from .lookups import (
     SEMANTICS,
     SYNTACTICS,
     FRACTIONS,
+    ENDBLC,
     OtherLaTeX
 )
 from .preprocessor import Preprocessor
 from .utils import TEX_EXTENSION, trim_whitespace, trim_blank_lines
-
-# Local constants.
-ENDBLC = OtherLaTeX.END_BLOCK.value
 
 ##############
 # MAIN CLASS #
@@ -36,6 +34,7 @@ class HPMLCompiler:
     enclose: bool = True
     manual_settowidth_string: str = None
     auto_center: bool = True
+    epigraph: list[str] = None
     # Non-public.
     _temp: str = None
     _lines: list[str] = None
@@ -76,6 +75,7 @@ class HPMLCompiler:
         """ Ronseal. """
         self._lines = self._temp.split("\n")
         self._update_manual_settowidth_string()
+        self._update_epigraph()
         self._purge_whitespace()
         self._process_choruses()
         self._process_minichoruses()
@@ -141,17 +141,17 @@ class HPMLCompiler:
                ):
                 pass
             elif (index != len(self._lines)-1) and (self._lines[index+1] == ""):
-                line = line+SEMANTICS.newverse.latex
+                line = line+OtherLaTeX.NEW_VERSE.value
                 self._lines[index] = line
             elif (
                 (index in (0, len(self._lines)-2)) or
                 (self._lines[index-1] == "") or
                 ((index < len(self._lines)-2) and (self._lines[index+2] == ""))
             ):
-                line = line+SEMANTICS.newline_nobreak.latex
+                line = line+OtherLaTeX.NEW_LINE_NO_BREAK.value
                 self._lines[index] = line
             else:
-                line = line+SEMANTICS.newline.latex
+                line = line+OtherLaTeX.NEW_LINE.value
                 self._lines[index] = line
 
     def _process_syntactics(self):
@@ -163,6 +163,10 @@ class HPMLCompiler:
         """ Replace every instance of old with new across all lines. """
         for index, line in enumerate(self._lines):
             self._lines[index] = line.replace(old, new)
+
+    def _replace_across_all_lines_semantic(self, semantic_obj):
+        """ Replace the HPML command with the equivalent LaTeX command. """
+        self._replace_across_all_lines(semantic_obj.hpml, semantic_obj.latex)
 
     def _process_semantics(self):
         """ Ronseal. """
@@ -177,46 +181,32 @@ class HPMLCompiler:
         self._process_stress()
         self._process_flagverses()
         self._process_subscript()
+        self._process_footnotes()
         self._process_whitespace()
 
     def _process_tabs(self):
         """ Ronseal. """
-        self._replace_across_all_lines(SEMANTICS.tab.hpml, SEMANTICS.tab.latex)
+        self._replace_across_all_lines_semantic(SEMANTICS.tab)
 
     def _process_margin_notes(self):
         """ Ronseal. """
-        self._replace_across_all_lines(
-            SEMANTICS.marginnote.hpml,
-            SEMANTICS.marginnote.latex
-        )
+        self._replace_across_all_lines_semantic(SEMANTICS.marginnote)
 
     def _process_places(self):
         """ Ronseal. """
-        self._replace_across_all_lines(
-            SEMANTICS.place.hpml,
-            SEMANTICS.place.latex
-        )
+        self._replace_across_all_lines_semantic(SEMANTICS.place)
 
     def _process_persons(self):
         """ Ronseal. """
-        self._replace_across_all_lines(
-            SEMANTICS.person.hpml,
-            SEMANTICS.person.latex
-        )
+        self._replace_across_all_lines_semantic(SEMANTICS.person)
 
     def _process_publications(self):
         """ Ronseal. """
-        self._replace_across_all_lines(
-            SEMANTICS.publication.hpml,
-            SEMANTICS.publication.latex
-        )
+        self._replace_across_all_lines_semantic(SEMANTICS.publication)
 
     def _process_foreign_strings(self):
         """ Ronseal. """
-        self._replace_across_all_lines(
-            SEMANTICS.foreign.hpml,
-            SEMANTICS.foreign.latex
-        )
+        self._replace_across_all_lines_semantic(SEMANTICS.foreign)
 
     def _process_fractions(self):
         """ Ronseal. """
@@ -225,32 +215,39 @@ class HPMLCompiler:
 
     def _process_ampersands(self):
         """ Ronseal. """
-        self._replace_across_all_lines(SEMANTICS.add.hpml, SEMANTICS.add.latex)
+        self._replace_across_all_lines_semantic(SEMANTICS.add)
 
     def _process_stress(self):
         """ Handles stressed syllables. """
-        self._replace_across_all_lines(
-            SEMANTICS.stress.hpml,
-            SEMANTICS.stress.latex
-        )
+        self._replace_across_all_lines_semantic(SEMANTICS.stress)
 
     def _process_flagverses(self):
         """ Adds mini-titles to particular verses. """
-        self._replace_across_all_lines(
-            SEMANTICS.flagverse.hpml,
-            SEMANTICS.flagverse.latex
-        )
+        self._replace_across_all_lines_semantic(SEMANTICS.flagverse)
 
     def _process_subscript(self):
         """ Ronseal. """
-        self._replace_across_all_lines(SEMANTICS.sub.hpml, SEMANTICS.sub.latex)
+        self._replace_across_all_lines_semantic(SEMANTICS.sub)
+
+    def _process_footnotes(self):
+        """ Ronseal. """
+        self._replace_across_all_lines_semantic(SEMANTICS.footnote)
+        self._replace_across_all_lines_semantic(SEMANTICS.blfootnote)
 
     def _process_whitespace(self):
         """ Ronseal. """
-        self._replace_across_all_lines(
-            SEMANTICS.whitespace.hpml,
-            SEMANTICS.whitespace.latex
-        )
+        self._replace_across_all_lines_semantic(SEMANTICS.whitespace)
+
+    def make_epigraph_block(self):
+        """ Make the epigraph block from the epigraph. """
+        result = [
+            OtherLaTeX.BEGIN_CENTER.value,
+            self.epigraph,
+            OtherLaTeX.END_CENTER.value,
+            OtherLaTeX.BIGSKIP.value,
+            OtherLaTeX.BIGSKIP.value
+        ]
+        return result
 
     def _enclose_output(self):
         """ Enclose the input in a poem environment. """
@@ -265,6 +262,9 @@ class HPMLCompiler:
         )
         if self.manual_settowidth_string or self.auto_center:
             self._center_output()
+        if self.epigraph:
+            epigraph_block = self.make_epigraph_block()
+            self._lines = epigraph_block+self._lines
 
     def _update_manual_settowidth_string(self):
         """ Check each line to see whether the verse width is set manually. """
@@ -276,6 +276,7 @@ class HPMLCompiler:
                 if not self.manual_settowidth_string:
                     self.manual_settowidth_string = line[settowidth_len:-1]
                 settowidth_line_index = index
+                break
         if settowidth_line_index is not None:
             self._lines.pop(settowidth_line_index)
 
@@ -297,6 +298,23 @@ class HPMLCompiler:
             ENDBLC
         )
         self._lines = [settowidth_line]+self._lines
+
+    def _update_epigraph(self):
+        """ Find and process the epigraph, if it exists. """
+        epigraph_marker = SEMANTICS.epigraph.hpml
+        epigraph_len = len(epigraph_marker)
+        epigraph_index = None
+        for index, line in enumerate(self._lines):
+            if line.startswith(epigraph_marker) and line.endswith(ENDBLC):
+                self.epigraph = (
+                    SEMANTICS.ital.latex+
+                    line[epigraph_len:-1]+
+                    OtherLaTeX.END_BLOCK.value
+                )
+                epigraph_index = index
+                break
+        if epigraph_index is not None:
+            self._lines.pop(epigraph_index)
 
     def save_to_file(self) -> str:
         """ Save the output string to a file. """

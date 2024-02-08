@@ -4,6 +4,7 @@ HPML into LaTeX.
 """
 
 # Standard imports.
+import re
 import warnings
 
 # Local imports.
@@ -68,6 +69,10 @@ class Preprocessor:
         """ Implement the mod. """
         for fraction, value in FRACTIONS.items():
             self.replace_substring(fraction, value.plain)
+
+    def suppress_marginnotes(self):
+        """ Implement the mod. """
+        re.sub("##MARGINNOTE{.*}", "", self.hpml)
 
     def em_dashes(self):
         """ Implement the mod. """

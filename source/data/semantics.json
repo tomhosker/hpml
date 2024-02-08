@@ -1,8 +1,26 @@
 {
+    "startblock": {
+        "hpml": "{",
+        "latex": "{",
+        "plain": ""
+    },
+    "endblock": {
+        "hpml": "}",
+        "latex": "}",
+        "plain": ""
+    },
     "add": {
         "hpml": "#ADD",
         "latex": "\\&",
         "plain": "and"
+    },
+    "blfootnote": {
+        "hpml": "#BLFOOTNOTE{",
+        "latex": "\\blfootnote{"
+    },
+    "footnote": {
+        "hpml": "#FOOTNOTE{",
+        "latex": "\\footnote{"
     },
     "foreign": {
         "hpml": "#FOREIGN{",
@@ -54,7 +72,8 @@
     },
     "tab": {
         "hpml": "##TAB",
-        "latex": "\\vin"
+        "latex": "\\vin",
+        "plain": "    "
     },
     "miniinscription": {
         "hpml": "##MINIINSCRIPTION ",
@@ -69,13 +88,7 @@
     "settowidth": {
         "hpml": "###SETTOWIDTH{"
     },
-    "newline": {
-        "latex": "\\\\"
-    },
-    "newline_nobreak": {
-        "latex": "\\\\*"
-    },
-    "newverse": {
-        "latex": "\\\\!"
+    "epigraph": {
+        "hpml": "###EPIGRAPH{"
     }
 }
