@@ -9,7 +9,7 @@ from .utils import (
     trim_whitespace,
     trim_blank_lines,
     remove_command_with_argument,
-    remove_commands_without_arguments
+    remove_commands_keep_arguments
 )
 
 # Constants.
@@ -18,7 +18,8 @@ COMMANDS_WITH_ARGUMENTS_TO_PURGE = (
     SEMANTICS.footnote.hpml,
     SEMANTICS.flagverse.hpml,
     SEMANTICS.marginnote.hpml,
-    SEMANTICS.settowidth.hpml
+    SEMANTICS.settowidth.hpml,
+    SEMANTICS.epigraph.hpml
 )
 
 ##############
@@ -34,8 +35,7 @@ class Centerer:
     def convert_lines_to_plain_text(self):
         """ Purge any HPML code, etc, from each line. """
         for index, line in enumerate(self.lines):
-            if not line.startswith("###"):
-                self.lines[index] = convert_line_of_hpml_to_plain_text(line)
+            self.lines[index] = convert_line_of_hpml_to_plain_text(line)
         self.lines = trim_blank_lines(self.lines)
 
     def get_second_longest_line(self):
@@ -53,6 +53,8 @@ class Centerer:
     def get_settowidth_string(self):
         """ Get the second longest PURGED line. """
         self.convert_lines_to_plain_text()
+        for line in self.lines:
+            print(line)
         return self.get_second_longest_line()
 
 ####################
@@ -66,7 +68,7 @@ def convert_line_of_hpml_to_plain_text(line):
     line = convert_fractions_in_line(line)
     for command in COMMANDS_WITH_ARGUMENTS_TO_PURGE:
         line = remove_command_with_argument(command, line)
-    line = remove_commands_without_arguments(line)
+    line = remove_commands_keep_arguments(line)
     line = line.replace(STABLC, "")
     line = line.replace(ENDBLC, "")
     line = trim_whitespace(line)

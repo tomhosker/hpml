@@ -1,0 +1,29 @@
+\usepackage{marginnote, mathtools, microtype, verse}
+
+\usepackage{fontspec}
+\newfontfamily\hoskeroe{English Towne}
+\setmainfont[
+    ItalicFont=cmunti.otf,
+    BoldFont=cmunbx.otf,
+    BoldItalicFont=cmunbi.otf,
+    Numbers=OldStyle
+]{cmunrm.otf}
+
+\usepackage{xfrac}
+\DeclareInstance{xfrac}{cmunrm.otf(0)}{text}{
+    slash-symbol-font = ptm,
+    scale-factor=0.8,
+    numerator-top-sep = 0pt,
+    denominator-bot-sep = 0pt,
+    slash-right-kern=-.25em,
+    slash-left-kern=-.3em
+}
+
+\usepackage[hidelinks]{hyperref} % Must be last.
+
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}

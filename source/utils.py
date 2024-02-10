@@ -87,16 +87,16 @@ def remove_command_with_argument(command, line):
     result = re.sub(regex_pattern, "", line)
     return result
 
-def remove_commands_without_arguments(line):
+def remove_commands_keep_arguments(line):
     """ Remove each #COMMAND, ##COMMAND, etc. """
-    for hashes in (1, 2):
-        result = remove_commands_with_hashes_but_without_arguments(line, hashes)
+    for regex_pattern in ("###\\w*", "##\\w*", "#\\w*"):
+        result = re.sub(regex_pattern, "", line)
     return result
 
-def remove_commands_with_hashes_but_without_arguments(line, hashes):
-    """ Remove each #COMMAND OR ##COMMAND, etc. """
-    regex_pattern = "\\w*"
-    for _ in range(hashes):
-        regex_pattern = "#"+regex_pattern
-    result = re.sub(regex_pattern, "", line)
+def get_package_code():
+    """ Get the LaTeX string in which all the packages necessary for HPML are
+    imported. """
+    path_to_packages = str(PATH_OBJ_TO_DATA/"packages.tex")
+    with open(path_to_packages, "r") as packages_file:
+        result = packages_file.read()
     return result
