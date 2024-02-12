@@ -107,7 +107,7 @@ class HPMLCompiler:
                     elif current_line == "":
                         self._lines[line_num-1] = previous_line+ENDBLC
                         break
-                self._lines[index] = OtherLaTeX.MULTILINE_ITALICS
+                self._lines[index] = OtherLaTeX.MULTILINE_ITALICS.value
 
     def _process_minichoruses(self):
         """ Handles mini-choruses and mini-inscriptions. """
@@ -136,7 +136,7 @@ class HPMLCompiler:
         for index, line in enumerate(self._lines):
             if (
                 (line == "") or
-                (line == OtherLaTeX.MULTILINE_ITALICS) or
+                (line == OtherLaTeX.MULTILINE_ITALICS.value) or
                 (index == len(self._lines)-1)
                ):
                 pass
