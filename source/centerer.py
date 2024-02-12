@@ -53,8 +53,6 @@ class Centerer:
     def get_settowidth_string(self):
         """ Get the second longest PURGED line. """
         self.convert_lines_to_plain_text()
-        for line in self.lines:
-            print(line)
         return self.get_second_longest_line()
 
 ####################
