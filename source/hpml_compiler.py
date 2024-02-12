@@ -102,7 +102,7 @@ class HPMLCompiler:
                 for line_num in range(index+1, len(self._lines)):
                     current_line = self._lines[line_num]
                     previous_line = self._lines[line_num-1]
-                    if index == len(self._lines)-1:
+                    if line_num == len(self._lines)-1:
                         self._lines[line_num] = current_line+ENDBLC
                     elif current_line == "":
                         self._lines[line_num-1] = previous_line+ENDBLC

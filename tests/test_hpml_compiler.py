@@ -1,5 +1,5 @@
 """
-This code defines the functions which test the HPMLCOMPILER class.
+This code defines the functions which test the HPMLCompiler class.
 """
 
 # Standard imports.
@@ -50,6 +50,18 @@ def test_manual_centering():
     handled correctly. """
     hpml_fn = "ode_on_a_grecian_urn_manual_centering.hpml"
     expected_fn = "ode_on_a_grecian_urn_manual_centering_expected.tex"
+    path_to_hpml = str(PATH_OBJ_TO_DATA/hpml_fn)
+    path_to_actual = Path(path_to_hpml).with_suffix(".tex")
+    path_to_expected = str(PATH_OBJ_TO_DATA/expected_fn)
+    compile_hpml_from_path(path_to_hpml)
+    assert_tex_equals(path_to_actual, path_to_expected)
+    # Clean.
+    Path(path_to_actual).unlink()
+
+def test_bug_chorus_endings():
+    """ Check that the bug involving chorus endings is fixed. """
+    hpml_fn = "south_australia.hpml"
+    expected_fn = "south_australia_expected.tex"
     path_to_hpml = str(PATH_OBJ_TO_DATA/hpml_fn)
     path_to_actual = Path(path_to_hpml).with_suffix(".tex")
     path_to_expected = str(PATH_OBJ_TO_DATA/expected_fn)
