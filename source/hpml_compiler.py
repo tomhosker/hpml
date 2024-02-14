@@ -175,6 +175,7 @@ class HPMLCompiler:
         self._process_places()
         self._process_persons()
         self._process_publications()
+        self._process_ships()
         self._process_foreign_strings()
         self._process_fractions()
         self._process_ampersands()
@@ -203,6 +204,10 @@ class HPMLCompiler:
     def _process_publications(self):
         """ Ronseal. """
         self._replace_across_all_lines_semantic(SEMANTICS.publication)
+
+    def _process_ships(self):
+        """ Ronseal. """
+        self._replace_across_all_lines_semantic(SEMANTICS.ship)
 
     def _process_foreign_strings(self):
         """ Ronseal. """
