@@ -13,10 +13,14 @@ from .lookups import (
     SYNTACTICS,
     FRACTIONS,
     ENDBLC,
-    OtherLaTeX
+    OtherLaTeX,
+    SuppressNonStandardMods
 )
 from .preprocessor import Preprocessor
 from .utils import TEX_EXTENSION, trim_whitespace, trim_blank_lines
+
+# Local constants.
+STANDARD_MODS = [SuppressNonStandardMods.SUPPRESS_FRACTIONS.value]
 
 ##############
 # MAIN CLASS #
@@ -40,6 +44,8 @@ class HPMLCompiler:
     _lines: list[str] = None
 
     def __post_init__(self):
+        if not self.mods:
+            self.mods = STANDARD_MODS
         if self.path_to_input_file and self.input_string:
             raise HPMLCompilerException(
                 "You must Specify either an input file or an input string, "+
