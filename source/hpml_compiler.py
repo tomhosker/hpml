@@ -29,19 +29,20 @@ STANDARD_MODS = [SuppressNonStandardMods.SUPPRESS_FRACTIONS.value]
 @dataclass
 class HPMLCompiler:
     """ The class in question. """
-    path_to_input_file: str = None
-    input_string: str = None
+    path_to_input_file: str|None = None
+    input_string: str|None = None
     is_prose_poem: bool = False
-    mods: list[str] = None
-    path_to_output_file: str = None
-    output_string: str = None
+    mods: list[str]|None = None
+    path_to_output_file: str|None = None
+    output_string: str|None = None
     enclose: bool = True
-    manual_settowidth_string: str = None
+    manual_settowidth_string: str|None = None
     auto_center: bool = True
-    epigraph: list[str] = None
+    epigraph: list[str]|None = None
+    line_numbers: int|None = None
     # Non-public.
-    _temp: str = None
-    _lines: list[str] = None
+    _temp: str|None = None
+    _lines: list[str]|None = None
 
     def __post_init__(self):
         if not self.mods:
@@ -249,7 +250,7 @@ class HPMLCompiler:
         """ Ronseal. """
         self._replace_across_all_lines_semantic(SEMANTICS.whitespace)
 
-    def make_epigraph_block(self):
+    def make_epigraph_block(self) -> list:
         """ Make the epigraph block from the epigraph. """
         result = [
             OtherLaTeX.BEGIN_CENTER.value,
@@ -260,12 +261,26 @@ class HPMLCompiler:
         ]
         return result
 
+    def _make_poem_lines(self) -> str|None:
+        """ Make the line of code which adds line numbers to the output. """
+        if not self.line_numbers:
+            return None
+        components = [
+            OtherLaTeX.POEM_LINES.value,
+            str(self.line_numbers),
+            OtherLaTeX.END_BLOCK.value
+        ]
+        result = "".join(components)
+        return result
+
     def _enclose_output(self):
         """ Enclose the input in a poem environment. """
         if self.manual_settowidth_string or self.auto_center:
             local_begin_verse = OtherLaTeX.BEGIN_VERSE_CENTERED.value
         else:
             local_begin_verse = OtherLaTeX.BEGIN_VERSE.value
+        if self.line_numbers:
+            self._lines = [self._make_poem_lines()]+self._lines
         self._lines = (
             [local_begin_verse]+
             self._lines+

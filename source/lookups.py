@@ -71,6 +71,7 @@ class OtherLaTeX(Enum):
     NEW_LINE = "\\\\"
     NEW_LINE_NO_BREAK = "\\\\*"
     NEW_VERSE = "\\\\!"
+    POEM_LINES = "\\poemlines{"
 
 #############
 # FUNCTIONS #
